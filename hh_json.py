@@ -9,6 +9,13 @@ from pycbrf import ExchangeRates
 
 
 def parce(vacancy, pages='3', where='all'):
+    """
+    Получение данных о средней максимальной и минимальной величине суммы в вакансии и 5 самых упоминаемых навыков
+    :param vacancy: текст для поиска
+    :param pages: количество страниц для анализа
+    :param where: место, где будет искать текст
+    :return: словарь с навыками
+    """
     url = 'https://api.hh.ru/vacancies'
     rate = ExchangeRates()
     if exists('area.pkl'):
@@ -16,6 +23,7 @@ def parce(vacancy, pages='3', where='all'):
             area = load(f)
     else:
         area = {}
+    # получение первого запроса
     p = {'text': vacancy if where == 'all' else f'NAME: {vacancy}' if where == 'name' else f'COMPANY_NAME: {vacancy}'}
     r = get(url=url, params=p).json()
     # pprint(r)
@@ -26,6 +34,7 @@ def parce(vacancy, pages='3', where='all'):
             'count': all_count}
     sal = {'from': [], 'to': [], 'cur': []}
     skillis = []
+    # перебор страниц в рамках ограничения
     for page in range(count_pages):
         if page > int(pages):
             break
@@ -36,6 +45,7 @@ def parce(vacancy, pages='3', where='all'):
         ress = get(url=url, params=p).json()
         all_count = len(ress['items'])
         result['count'] += all_count
+        # перебор каждой вакансии
         for res in ress['items']:
             # pprint(res)
             skills = set()
@@ -65,11 +75,12 @@ def parce(vacancy, pages='3', where='all'):
                 k = 1 if code == 'RUR' else float(rate[code].value)
                 sal['from'].append(k * res_full['salary']['from'] if res['salary']['from'] else k * res_full['salary']['to'])
                 sal['to'].append(k * res_full['salary']['to'] if res['salary']['to'] else k*res_full['salary']['from'])
-    # print(skillis)
+    # создание словаря-счетчика для навыков
     sk2 = Counter(skillis)
     # pprint(sk2)
     up = sum(sal['from']) / len(sal['from'])
     down = sum(sal['to']) / len(sal['to'])
+    # формирование результирующего словаря
     result.update({'down': round(up, 2),
                    'up': round(down, 2)})
     add = []
