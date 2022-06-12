@@ -9,6 +9,6 @@ pip install -r requirements.txt
 в терминале:
 
 ```bash
-$ export FLASK_APP=MAIN
+$ export FLASK_APP=main
 $ flask run
 ```
