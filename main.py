@@ -30,3 +30,11 @@ def result():
     dat = {**data, **vac}  # data | vac - в Python 3.10 можно сделать так
     print(dat)
     return render_template('about.html', res=dat)
+
+
+@app.route('/contacts/')
+def contacts():
+    return render_template('contacts.html')
+
+if __name__ == '__main__':
+    app.run()
